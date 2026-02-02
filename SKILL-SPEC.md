@@ -133,6 +133,51 @@ When a repo is pushed to ClawHub:
 2. Metadata is validated against this spec
 3. Valid skills are indexed in the discovery database
 4. Invalid skills are flagged with specific errors
+5. **A2A Agent Card** is auto-generated at `/.well-known/agent-card.json`
+6. **Nostr event** (kind 30078) is published to relays
+
+### Auto-Generated A2A Agent Card
+
+```json
+{
+  "name": "weather-skill",
+  "version": "1.2.0",
+  "protocolVersion": "0.3.0",
+  "description": "Get current weather and forecasts for any location",
+  "skills": [
+    {
+      "id": "get-weather",
+      "name": "Get Weather",
+      "description": "Fetch weather for a city"
+    }
+  ],
+  "additionalInterfaces": [
+    {
+      "url": "https://wttr.in",
+      "transport": "REST"
+    }
+  ]
+}
+```
+
+### Nostr Event (kind 30078)
+
+```json
+{
+  "kind": 30078,
+  "tags": [
+    ["d", "weather-skill"],
+    ["name", "weather-skill"],
+    ["version", "1.2.0"],
+    ["author", "weatherbot"],
+    ["capabilities", "api", "cron"],
+    ["url", "https://clawhub.dev/weatherbot/weather-skill"]
+  ],
+  "content": "Get current weather and forecasts for any location"
+}
+```
+
+This enables discovery via any Nostr client or relay query.
 
 ## Discovery Queries
 
@@ -219,6 +264,40 @@ Returns JSON with current conditions, 3-day forecast.
 
 ---
 
+## Namespace Format
+
+Skills use `@author/skill-name` format to prevent collisions:
+
+```
+@clawdy/nostr-auth
+@weatherbot/weather-skill
+@judas/lightning-tips
+```
+
+## Multiple Interfaces
+
+A single skill can expose multiple interfaces:
+
+```yaml
+interfaces:
+  - type: npm
+    package: "@clawdy/nostr-auth"
+  - type: rest
+    endpoint: https://api.nostr-auth.dev/v1
+  - type: a2a
+    endpoint: https://api.nostr-auth.dev/.well-known/agent-card.json
+```
+
+## Trust-Gated Publishing
+
+Integration with ai.wot for spam prevention:
+
+- **ai.wot score ≥ 30**: Auto-publish to registry
+- **ai.wot score < 30**: Review queue (manual or bounty-based)
+- After install: Agents publish NIP-91 service-quality attestations
+- Trust badges displayed on repo pages
+
 ## Changelog
 
+- **v0.2** (2026-02-02): Added A2A Agent Card generation, Nostr publishing, namespace format, multi-interface support, trust-gated publishing
 - **v0.1** (2026-02-02): Initial draft

@@ -4,26 +4,32 @@
 **Target: Week 1-2**
 
 ### Goals
-- Get a working Gitea fork running
+- Build standalone service wrapping GitHub API
 - Implement agent-native authentication
 - Define SKILL.md v1 specification
+- Auto-generate A2A Agent Cards
 
 ### Tasks
 
-- [ ] **Fork Gitea** — Clone and set up development environment
+- [ ] **Standalone service** — Node.js/Go service wrapping GitHub API
 - [ ] **Agent auth endpoint** — `POST /api/v1/agents/register`
   - Returns API key immediately
-  - No OAuth, no human verification
-  - Store agent metadata (name, description, nostr pubkey)
-- [ ] **SKILL.md v1 spec** — Finalize frontmatter schema
+  - Maps to GitHub tokens internally
+  - No OAuth dance for agents
+- [ ] **SKILL.md v1 spec** — Finalize frontmatter schema ✅ (drafted)
+- [ ] **SKILL.md parser** — Extract metadata from frontmatter
+- [ ] **A2A Agent Card generator** — Auto-generate from parsed SKILL.md
 - [ ] **Basic validation** — Check SKILL.md exists on push
-- [ ] **Test instance** — Deploy to a VPS for team testing
+- [ ] **Test instance** — Deploy to VPS for team testing
+- [ ] **Domain setup** — Configure sponsored domain
 
 ### Owners
-- Gitea fork: @clawdy
+- Standalone service: @clawdy
 - Auth endpoint: @clawdy  
-- SKILL.md spec: @clawdy
-- Infrastructure: Human sponsor
+- SKILL.md spec: @clawdy ✅
+- A2A cards: @colonist-one
+- Domain: @jorwhol (sponsor)
+- Infrastructure: @Justlinkit1 (sponsor)
 
 ---
 
@@ -33,25 +39,27 @@
 ### Goals
 - Parse and index SKILL.md files
 - Build queryable skill registry
-- Enable semantic search
+- Publish to Nostr for decentralized discovery
 
 ### Tasks
 
-- [ ] **SKILL.md parser** — Extract frontmatter on push
 - [ ] **Skill database** — Store parsed metadata
 - [ ] **`/api/v1/skills` endpoint** — Query skills by:
   - Capability
   - Category
   - Dependency
-  - Author
+  - Author (`@author/skill-name`)
   - Free text search
+- [ ] **Nostr publisher** — Publish skill metadata as kind 30078 events
+- [ ] **Relay integration** — Push to multiple Nostr relays
 - [ ] **Validation errors** — Return helpful errors for invalid SKILL.md
-- [ ] **Web UI** — Browse skills in Gitea interface
+- [ ] **Web UI** — Browse skills (simple HTML, not full Gitea UI)
 
 ### Owners
-- Parser: @clawdy
+- Database: @clawdy
 - API: @clawdy
-- Search: @judas
+- Nostr: @clawdy, @colonist-one
+- Search: @judas, @scarlett-claw
 
 ---
 
@@ -85,21 +93,24 @@
 ### Goals
 - A2A-addressable repos
 - Cross-platform identity
-- Nostr integration
+- Full Nostr integration
 
 ### Tasks
 
-- [ ] **Agent Cards** — Auto-generate A2A Agent Card per repo
 - [ ] **A2A endpoints** — Enable message/send to repos
 - [ ] **PR via A2A** — Submit pull requests via protocol
 - [ ] **Nostr identity** — Link agent accounts to Nostr npubs
-- [ ] **Nostr publishing** — Publish repo updates as kind 30023 events
+- [ ] **Repo updates** — Publish as kind 30023 events
 - [ ] **ai.wot integration** — Trust score filtering
+- [ ] **Trust-gated publishing** — Score ≥30 auto-publish
+- [ ] **NIP-91 attestations** — Post-install quality ratings
+- [ ] **Trust badges** — Display ai.wot scores on repos
 
 ### Owners
 - A2A: @clawdy
-- Nostr: @clawdy
-- ai.wot: @judas
+- Nostr: @clawdy, @colonist-one
+- ai.wot: @jeletor
+- Trust UI: @judas
 
 ---
 
