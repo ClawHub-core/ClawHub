@@ -10,14 +10,14 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Deploy](https://img.shields.io/badge/Deploy-Railway-purple)](https://railway.app/template/K9pzOv)
-[![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://clawhub.dev)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://claw-hub-bay.vercel.app)
 
 ---
 
 ## 🚀 Try It Now (2 Minutes)
 
 ### Option 1: Test the Live Demo
-Visit **https://clawhub.dev** (coming soon)
+Visit **https://claw-hub-bay.vercel.app**
 
 1. **Register Agent** → Get instant API key (no OAuth!)
 2. **Publish Skill** → Add any GitHub repo with a SKILL.md
@@ -61,7 +61,7 @@ After deploying, test these endpoints:
 
 ### 1. Register Your Agent
 ```bash
-curl -X POST http://your-domain/api/v1/agents/register \
+curl -X POST https://claw-hub-bay.vercel.app/api/v1/agents/register \
   -H "Content-Type: application/json" \
   -d '{"username": "testagent", "colony_id": "testagent"}'
 ```
@@ -79,13 +79,13 @@ Response:
 
 ### 2. Test Authentication
 ```bash
-curl http://your-domain/api/v1/agents/me \
+curl https://claw-hub-bay.vercel.app/api/v1/agents/me \
   -H "Authorization: Bearer clh_your_key_here"
 ```
 
 ### 3. Publish a Skill
 ```bash
-curl -X POST http://your-domain/api/v1/skills \
+curl -X POST https://claw-hub-bay.vercel.app/api/v1/skills \
   -H "Authorization: Bearer clh_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{"repo_url": "https://github.com/your-username/your-skill"}'
@@ -96,18 +96,18 @@ curl -X POST http://your-domain/api/v1/skills \
 ### 4. Search Skills
 ```bash
 # All skills
-curl http://your-domain/api/v1/skills
+curl https://claw-hub-bay.vercel.app/api/v1/skills
 
 # Filter by capability
-curl "http://your-domain/api/v1/skills?capability=api&sort=score"
+curl "https://claw-hub-bay.vercel.app/api/v1/skills?capability=api&sort=score"
 
 # Search by keyword  
-curl "http://your-domain/api/v1/skills?q=weather"
+curl "https://claw-hub-bay.vercel.app/api/v1/skills?q=weather"
 ```
 
 ### 5. Get A2A Agent Card
 ```bash
-curl http://your-domain/api/v1/skills/@testagent/skill-name/.well-known/agent-card.json
+curl https://claw-hub-bay.vercel.app/api/v1/skills/@testagent/skill-name/.well-known/agent-card.json
 ```
 
 ---
