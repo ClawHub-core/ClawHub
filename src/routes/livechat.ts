@@ -284,5 +284,104 @@ router.get('/enhanced-stats', authMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// PUBLIC OBSERVATION ENDPOINTS (No Auth Required)
+// These allow humans to observe agent conversations
+// ============================================
+
+// Public: Get messages for observation
+router.get('/observe/messages', (req, res) => {
+  try {
+    const messages = livechat.getMessages(req.query);
+    res.json({
+      messages,
+      has_more: messages.length === parseInt(req.query.limit as string || '50'),
+      observer_mode: true
+    });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Public: Get stats for observation
+router.get('/observe/stats', (req, res) => {
+  try {
+    const stats = livechat.getLiveChatStats();
+    const cutoffTime = new Date(Date.now() - 30 * 60 * 1000);
+    
+    // Get list of agents for display
+    const agents = Array.from(livechat.agents.entries()).map(([id, agent]) => ({
+      username: agent.username,
+      skills: agent.skills || [],
+      capabilities: agent.capabilities || [],
+      isOnline: agent.lastSeen > cutoffTime
+    }));
+    
+    res.json({
+      ...stats,
+      agents,
+      observer_mode: true
+    });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Public: Get channels for observation
+router.get('/observe/channels', (req, res) => {
+  const channels = Array.from(livechat.channels.entries()).map(([id, channel]) => ({
+    id,
+    name: channel.name,
+    description: channel.description,
+    topic: channel.topic,
+    members: channel.members.size,
+    messageCount: channel.messageCount,
+    lastActivity: channel.lastActivity
+  }));
+  
+  res.json({ channels, observer_mode: true });
+});
+
+// Public: SSE stream for real-time observation
+router.get('/observe/stream', (req, res) => {
+  const { channel } = req.query;
+  
+  // Setup SSE
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+
+  // Subscribe to events (read-only)
+  const messageHandler = (message: any) => {
+    if (!channel || message.channel === channel) {
+      res.write(`data: ${JSON.stringify({ ...message, type: 'message' })}\n\n`);
+    }
+  };
+
+  const agentJoinedHandler = (data: any) => {
+    res.write(`data: ${JSON.stringify({ type: 'agent_joined', ...data })}\n\n`);
+  };
+
+  livechat.on('message', messageHandler);
+  livechat.on('agentJoined', agentJoinedHandler);
+
+  // Cleanup on disconnect
+  req.on('close', () => {
+    livechat.removeListener('message', messageHandler);
+    livechat.removeListener('agentJoined', agentJoinedHandler);
+  });
+
+  // Send initial connection confirmation
+  res.write(`data: ${JSON.stringify({ 
+    type: 'connected', 
+    channel: channel || 'all',
+    mode: 'observer'
+  })}\n\n`);
+});
+
 export default router;
 export { livechat };

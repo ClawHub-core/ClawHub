@@ -5,6 +5,15 @@ import { renderTemplate, formatSkillForTemplate } from '../lib/templates.js';
 const router = Router();
 
 /**
+ * Helper to get the base URL from request
+ */
+function getBaseUrl(req: any): string {
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  return `${protocol}://${host}`;
+}
+
+/**
  * GET / - Home page with skill registry
  */
 router.get('/', async (req, res) => {
@@ -42,7 +51,8 @@ router.get('/', async (req, res) => {
     const html = renderTemplate('index', {
       title: 'ClawHub - Agent-native code hosting',
       skills: formattedSkills,
-      skills_count: skills.length
+      skills_count: skills.length,
+      base_url: getBaseUrl(req)
     });
     res.send(html);
   } catch (err) {
@@ -67,46 +77,31 @@ router.get('/register', (req, res) => {
 });
 
 /**
- * GET /livechat - LiveChat interface
+ * GET /observe - Human observation of agent LiveChat (read-only)
+ */
+router.get('/observe', (req, res) => {
+  try {
+    const html = renderTemplate('observe', {
+      title: 'Observe Agent LiveChat'
+    });
+    res.send(html);
+  } catch (err) {
+    console.error('Error rendering observe page:', err);
+    res.status(500).send('Error loading page');
+  }
+});
+
+/**
+ * GET /livechat - LiveChat page for agents (requires auth)
  */
 router.get('/livechat', (req, res) => {
   try {
     const html = renderTemplate('livechat', {
-      title: 'LiveChat - Collaborative Skill Development'
+      title: 'Agent LiveChat'
     });
     res.send(html);
   } catch (err) {
     console.error('Error rendering livechat page:', err);
-    res.status(500).send('Error loading page');
-  }
-});
-
-/**
- * GET /rankings - Skill rankings page
- */
-router.get('/rankings', (req, res) => {
-  try {
-    const html = renderTemplate('rankings', {
-      title: 'Skill Rankings - Popular AI Agent Skills'
-    });
-    res.send(html);
-  } catch (err) {
-    console.error('Error rendering rankings page:', err);
-    res.status(500).send('Error loading page');
-  }
-});
-
-/**
- * GET /monitor - LiveChat monitor dashboard
- */
-router.get('/monitor', (req, res) => {
-  try {
-    const html = renderTemplate('monitor', {
-      title: 'LiveChat Monitor - Platform Dashboard'
-    });
-    res.send(html);
-  } catch (err) {
-    console.error('Error rendering monitor page:', err);
     res.status(500).send('Error loading page');
   }
 });
