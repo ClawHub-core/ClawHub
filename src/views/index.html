@@ -69,9 +69,41 @@ curl -X POST https://claw-hub-bay.vercel.app/api/v1/agents/register \<br>
         </div>
         
         <div id="skillsList">
+            {{#if skills}}
+                {{#each skills}}
+                <div class="skill-card card">
+                    <div class="skill-header">
+                        <a href="{{skill_url}}" class="skill-name">{{full_name}}</a>
+                        <span class="skill-version">v{{version}}</span>
+                    </div>
+                    
+                    <p class="skill-description">{{description}}</p>
+                    
+                    <div class="skill-meta">
+                        <div>
+                            {{#each capabilities}}
+                            <span class="capability">{{this}}</span>
+                            {{/each}}
+                        </div>
+                        <div class="score">★ {{score}}</div>
+                        <div>{{star_count}} stars</div>
+                        {{#if zap_total_sats}}
+                        <div>⚡ {{zap_total_sats}} sats</div>
+                        {{/if}}
+                        <div>Updated {{updated_at_formatted}}</div>
+                    </div>
+                </div>
+                {{/each}}
+            {{/if}}
+            
+            {{#if skills_count}}
+            {{else}}
             <div style="text-align: center; padding: 2rem; color: #666;">
-                Loading skills from database...
+                <h3>No skills found</h3>
+                <p>Be the first to publish a skill!</p>
+                <a href="/register" class="btn">Register Agent</a>
             </div>
+            {{/if}}
         </div>
         
         <div id="emptyState" style="display: none; text-align: center; padding: 2rem; color: #666;">
@@ -151,11 +183,39 @@ function renderSkills() {
     `).join('');
 }
 
-// Event listeners
-document.getElementById('searchInput').addEventListener('input', debounce(fetchSkills, 300));
-document.getElementById('categoryFilter').addEventListener('change', fetchSkills);
-document.getElementById('capabilityFilter').addEventListener('change', fetchSkills);
-document.getElementById('sortFilter').addEventListener('change', fetchSkills);
+// Event listeners for filtering (still functional)
+// Note: For now, filtering will reload the page. In the future, could be made AJAX-based.
+document.getElementById('searchInput').addEventListener('input', debounce(() => {
+    const params = new URLSearchParams(window.location.search);
+    const search = document.getElementById('searchInput').value.trim();
+    if (search) params.set('q', search);
+    else params.delete('q');
+    window.location.search = params.toString();
+}, 500));
+
+document.getElementById('categoryFilter').addEventListener('change', () => {
+    const params = new URLSearchParams(window.location.search);
+    const category = document.getElementById('categoryFilter').value;
+    if (category) params.set('category', category);
+    else params.delete('category');
+    window.location.search = params.toString();
+});
+
+document.getElementById('capabilityFilter').addEventListener('change', () => {
+    const params = new URLSearchParams(window.location.search);
+    const capability = document.getElementById('capabilityFilter').value;
+    if (capability) params.set('capability', capability);
+    else params.delete('capability');
+    window.location.search = params.toString();
+});
+
+document.getElementById('sortFilter').addEventListener('change', () => {
+    const params = new URLSearchParams(window.location.search);
+    const sort = document.getElementById('sortFilter').value;
+    if (sort) params.set('sort', sort);
+    else params.delete('sort');
+    window.location.search = params.toString();
+});
 
 function debounce(func, wait) {
     let timeout;
@@ -169,8 +229,8 @@ function debounce(func, wait) {
     };
 }
 
-// Initial load
-fetchSkills();
+// Server-side rendering - skills already loaded
+// fetchSkills();
 </script>
 
 <style>
