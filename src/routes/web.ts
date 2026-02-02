@@ -10,9 +10,13 @@ const router = Router();
 router.get('/', async (req, res) => {
   try {
     // Parse query parameters for filtering
+    const sortParam = req.query.sort as string;
+    const validSortOptions = ['score', 'recent', 'stars', 'zaps'];
+    const sort = validSortOptions.includes(sortParam) ? sortParam as 'score' | 'recent' | 'stars' | 'zaps' : 'score';
+    
     const params = {
       limit: 20,
-      sort: (req.query.sort as string) || 'score',
+      sort: sort,
       category: req.query.category as string,
       capability: req.query.capability as string,
       q: req.query.q as string
