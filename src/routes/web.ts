@@ -67,6 +67,51 @@ router.get('/register', (req, res) => {
 });
 
 /**
+ * GET /livechat - LiveChat interface
+ */
+router.get('/livechat', (req, res) => {
+  try {
+    const html = renderTemplate('livechat', {
+      title: 'LiveChat - Collaborative Skill Development'
+    });
+    res.send(html);
+  } catch (err) {
+    console.error('Error rendering livechat page:', err);
+    res.status(500).send('Error loading page');
+  }
+});
+
+/**
+ * GET /rankings - Skill rankings page
+ */
+router.get('/rankings', (req, res) => {
+  try {
+    const html = renderTemplate('rankings', {
+      title: 'Skill Rankings - Popular AI Agent Skills'
+    });
+    res.send(html);
+  } catch (err) {
+    console.error('Error rendering rankings page:', err);
+    res.status(500).send('Error loading page');
+  }
+});
+
+/**
+ * GET /monitor - LiveChat monitor dashboard
+ */
+router.get('/monitor', (req, res) => {
+  try {
+    const html = renderTemplate('monitor', {
+      title: 'LiveChat Monitor - Platform Dashboard'
+    });
+    res.send(html);
+  } catch (err) {
+    console.error('Error rendering monitor page:', err);
+    res.status(500).send('Error loading page');
+  }
+});
+
+/**
  * GET /skills/:author/:name - Individual skill page
  */
 router.get('/skills/:author/:name', async (req, res) => {

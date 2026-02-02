@@ -1,0 +1,674 @@
+<style>
+    .rankings-header {
+        text-align: center;
+        padding: 40px 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .rankings-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+    }
+    
+    .rankings-subtitle {
+        font-size: 18px;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .controls {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .filter-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .category-filter {
+        padding: 8px 16px;
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #f0f6fc;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    
+    .category-filter.active {
+        background: #2188ff;
+        border-color: #2188ff;
+        color: white;
+    }
+    
+    .category-filter:hover {
+        border-color: #58a6ff;
+    }
+    
+    .sort-controls {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .sort-btn {
+        padding: 8px 12px;
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #f0f6fc;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+    
+    .sort-btn.active {
+        background: #238636;
+        border-color: #238636;
+        color: white;
+    }
+    
+    .sort-btn:hover {
+        border-color: #58a6ff;
+    }
+    
+    .rankings-grid {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 30px;
+    }
+    
+    .main-rankings {
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .rankings-list {
+        padding: 0;
+    }
+    
+    .skill-rank {
+        padding: 20px 25px;
+        border-bottom: 1px solid #30363d;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.2s;
+    }
+    
+    .skill-rank:hover {
+        background: #161b22;
+    }
+    
+    .skill-rank:last-child {
+        border-bottom: none;
+    }
+    
+    .rank-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #30363d;
+        color: #f0f6fc;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    
+    .rank-number.top3 {
+        background: linear-gradient(135deg, #f39c12, #f1c40f);
+        color: #0d1117;
+    }
+    
+    .skill-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .skill-name {
+        font-size: 20px;
+        font-weight: 600;
+        color: #58a6ff;
+        margin-bottom: 5px;
+        text-decoration: none;
+    }
+    
+    .skill-name:hover {
+        color: #79c0ff;
+        text-decoration: underline;
+    }
+    
+    .skill-author {
+        color: #8b949e;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .skill-description {
+        color: #f0f6fc;
+        font-size: 14px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .skill-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+    
+    .skill-tag {
+        background: #1f6feb;
+        color: #f0f6fc;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .skill-stats {
+        display: flex;
+        gap: 15px;
+        font-size: 12px;
+        color: #8b949e;
+    }
+    
+    .skill-metrics {
+        text-align: right;
+        padding-left: 20px;
+    }
+    
+    .star-rating {
+        font-size: 24px;
+        color: #f39c12;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 12px;
+        min-width: 120px;
+    }
+    
+    .metric-label {
+        color: #8b949e;
+    }
+    
+    .metric-value {
+        font-weight: 600;
+        color: #f0f6fc;
+    }
+    
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .sidebar-card {
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .sidebar-header {
+        background: #161b22;
+        color: #f0f6fc;
+        padding: 15px 20px;
+        font-weight: 600;
+        font-size: 16px;
+        border-bottom: 1px solid #30363d;
+    }
+    
+    .sidebar-content {
+        padding: 20px;
+    }
+    
+    .summary-stat {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #30363d;
+    }
+    
+    .summary-stat:last-child {
+        border-bottom: none;
+    }
+    
+    .summary-label {
+        color: #8b949e;
+    }
+    
+    .summary-value {
+        font-weight: 600;
+        color: #f0f6fc;
+    }
+    
+    .author-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #30363d;
+    }
+    
+    .author-item:last-child {
+        border-bottom: none;
+    }
+    
+    .author-name {
+        font-weight: 600;
+        color: #58a6ff;
+    }
+    
+    .author-stats {
+        font-size: 11px;
+        color: #8b949e;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #8b949e;
+    }
+    
+    .error {
+        text-align: center;
+        padding: 40px;
+        color: #f85149;
+    }
+    
+    .refresh-indicator {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #238636;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .refresh-indicator.visible {
+        opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+        .rankings-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-controls,
+        .sort-controls {
+            justify-content: center;
+        }
+        
+        .skill-rank {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .skill-metrics {
+            padding-left: 0;
+        }
+    }
+</style>
+
+<div class="rankings-header">
+    <h1 class="rankings-title">⭐ Skill Rankings</h1>
+    <p class="rankings-subtitle">Discover the most popular and highest-rated AI agent skills</p>
+</div>
+
+<div class="controls">
+    <div class="filter-controls">
+        <button class="category-filter active" data-category="all">All Categories</button>
+        <button class="category-filter" data-category="utilities">Utilities</button>
+        <button class="category-filter" data-category="finance">Finance</button>
+        <button class="category-filter" data-category="ai">AI & ML</button>
+        <button class="category-filter" data-category="social">Social</button>
+        <button class="category-filter" data-category="infrastructure">Infrastructure</button>
+    </div>
+    
+    <div class="sort-controls">
+        <button class="sort-btn active" data-sort="stars">⭐ Most Stars</button>
+        <button class="sort-btn" data-sort="recent">🕒 Recent</button>
+        <button class="sort-btn" data-sort="score">🏆 Best Score</button>
+    </div>
+</div>
+
+<div class="rankings-grid">
+    <div class="main-rankings">
+        <div class="rankings-list" id="skillsList">
+            <div class="loading">Loading skill rankings...</div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-card">
+            <div class="sidebar-header">📊 Platform Summary</div>
+            <div class="sidebar-content" id="platformSummary">
+                <div class="summary-stat">
+                    <span class="summary-label">Total Skills</span>
+                    <span class="summary-value" id="totalSkillsCount">-</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-label">Total Stars</span>
+                    <span class="summary-value" id="totalStarsCount">-</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-label">Active Developers</span>
+                    <span class="summary-value" id="activeDevelopers">-</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-label">Categories</span>
+                    <span class="summary-value" id="totalCategories">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-card">
+            <div class="sidebar-header">🏆 Top Authors</div>
+            <div class="sidebar-content">
+                <div id="topAuthors">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-card">
+            <div class="sidebar-header">🔥 Trending Categories</div>
+            <div class="sidebar-content" id="trendingCategories">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="refresh-indicator" id="refreshIndicator">
+    Updating rankings...
+</div>
+
+<script>
+    let currentSort = 'stars';
+    let currentCategory = 'all';
+    let allSkills = [];
+    
+    const API_BASE = '/api/v1';
+
+    async function loadAllData() {
+        showRefreshIndicator();
+        
+        try {
+            await Promise.all([
+                loadSkills(),
+                loadPlatformSummary(),
+                loadTopAuthors(),
+                loadTrendingCategories()
+            ]);
+        } catch (error) {
+            console.error('Error loading data:', error);
+            document.getElementById('skillsList').innerHTML = '<div class="error">Error loading skill data. Please try again.</div>';
+        } finally {
+            hideRefreshIndicator();
+        }
+    }
+
+    async function loadSkills() {
+        try {
+            const response = await fetch(`${API_BASE}/skills?limit=100&sort=${currentSort}`);
+            if (!response.ok) throw new Error('Failed to fetch skills');
+            
+            const data = await response.json();
+            allSkills = data.skills || [];
+            
+            renderSkills();
+        } catch (error) {
+            console.error('Error loading skills:', error);
+            document.getElementById('skillsList').innerHTML = '<div class="error">Error loading skills</div>';
+        }
+    }
+
+    function renderSkills() {
+        let filteredSkills = allSkills;
+        
+        // Filter by category
+        if (currentCategory !== 'all') {
+            filteredSkills = allSkills.filter(skill => 
+                skill.category === currentCategory
+            );
+        }
+
+        const skillsList = document.getElementById('skillsList');
+        
+        if (filteredSkills.length === 0) {
+            skillsList.innerHTML = '<div style="text-align: center; padding: 50px; color: #8b949e;">No skills found for this category</div>';
+            return;
+        }
+
+        skillsList.innerHTML = filteredSkills.map((skill, index) => {
+            const capabilities = JSON.parse(skill.capabilities || '[]');
+            const author = skill.full_name.split('/')[0].substring(1);
+            const createdDate = new Date(skill.created_at).toLocaleDateString();
+            const skillUrl = `/skills/${author}/${skill.name}`;
+            
+            return `
+                <div class="skill-rank">
+                    <div class="rank-number ${index < 3 ? 'top3' : ''}">${index + 1}</div>
+                    <div class="skill-info">
+                        <a href="${skillUrl}" class="skill-name">${skill.name}</a>
+                        <div class="skill-author">by ${author}</div>
+                        <div class="skill-description">${skill.description || 'No description available'}</div>
+                        <div class="skill-tags">
+                            ${capabilities.map(cap => `<span class="skill-tag">${cap}</span>`).join('')}
+                            ${skill.category ? `<span class="skill-tag">${skill.category}</span>` : ''}
+                        </div>
+                        <div class="skill-stats">
+                            <span>📅 ${createdDate}</span>
+                            <span>🔗 ${skill.interface_type || 'API'}</span>
+                            ${skill.license ? `<span>📄 ${skill.license}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="skill-metrics">
+                        <div class="star-rating">⭐ ${skill.star_count || 0}</div>
+                        <div class="metric-row">
+                            <span class="metric-label">Score:</span>
+                            <span class="metric-value">${Math.round(skill.score || 0)}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Version:</span>
+                            <span class="metric-value">${skill.version || '1.0.0'}</span>
+                        </div>
+                        ${skill.zap_total_sats ? `
+                        <div class="metric-row">
+                            <span class="metric-label">Zaps:</span>
+                            <span class="metric-value">${skill.zap_total_sats} ⚡</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function loadPlatformSummary() {
+        try {
+            const response = await fetch(`${API_BASE}/skills?limit=1000`);
+            if (!response.ok) throw new Error('Failed to fetch platform summary');
+            
+            const data = await response.json();
+            const skills = data.skills || [];
+            
+            const totalStars = skills.reduce((sum, skill) => sum + (skill.star_count || 0), 0);
+            const authors = new Set(skills.map(skill => 
+                skill.full_name.split('/')[0].substring(1)
+            ));
+            const categories = new Set(skills.map(skill => skill.category).filter(Boolean));
+            
+            document.getElementById('totalSkillsCount').textContent = skills.length;
+            document.getElementById('totalStarsCount').textContent = totalStars;
+            document.getElementById('activeDevelopers').textContent = authors.size;
+            document.getElementById('totalCategories').textContent = categories.size;
+        } catch (error) {
+            console.error('Error loading platform summary:', error);
+        }
+    }
+
+    async function loadTopAuthors() {
+        try {
+            const response = await fetch(`${API_BASE}/skills?limit=1000`);
+            if (!response.ok) throw new Error('Failed to fetch authors');
+            
+            const data = await response.json();
+            const skills = data.skills || [];
+            
+            // Group by author
+            const authorStats = {};
+            skills.forEach(skill => {
+                const author = skill.full_name.split('/')[0].substring(1);
+                if (!authorStats[author]) {
+                    authorStats[author] = {
+                        skillCount: 0,
+                        totalStars: 0,
+                        totalScore: 0
+                    };
+                }
+                authorStats[author].skillCount++;
+                authorStats[author].totalStars += skill.star_count || 0;
+                authorStats[author].totalScore += skill.score || 0;
+            });
+            
+            // Sort by total stars
+            const sortedAuthors = Object.entries(authorStats)
+                .sort(([,a], [,b]) => b.totalStars - a.totalStars)
+                .slice(0, 10);
+            
+            const topAuthorsDiv = document.getElementById('topAuthors');
+            if (sortedAuthors.length === 0) {
+                topAuthorsDiv.innerHTML = '<div style="text-align: center; color: #8b949e;">No authors yet</div>';
+            } else {
+                topAuthorsDiv.innerHTML = sortedAuthors.map(([author, stats]) => `
+                    <div class="author-item">
+                        <div>
+                            <div class="author-name">${author}</div>
+                            <div class="author-stats">${stats.skillCount} skills • ⭐ ${stats.totalStars}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Error loading top authors:', error);
+            document.getElementById('topAuthors').innerHTML = '<div class="error">Error loading authors</div>';
+        }
+    }
+
+    async function loadTrendingCategories() {
+        try {
+            const response = await fetch(`${API_BASE}/skills?limit=1000`);
+            if (!response.ok) throw new Error('Failed to fetch categories');
+            
+            const data = await response.json();
+            const skills = data.skills || [];
+            
+            // Group by category
+            const categoryStats = {};
+            skills.forEach(skill => {
+                const category = skill.category || 'uncategorized';
+                if (!categoryStats[category]) {
+                    categoryStats[category] = {
+                        skillCount: 0,
+                        totalStars: 0
+                    };
+                }
+                categoryStats[category].skillCount++;
+                categoryStats[category].totalStars += skill.star_count || 0;
+            });
+            
+            // Sort by skill count
+            const sortedCategories = Object.entries(categoryStats)
+                .sort(([,a], [,b]) => b.skillCount - a.skillCount)
+                .slice(0, 5);
+            
+            const trendingCategoriesDiv = document.getElementById('trendingCategories');
+            if (sortedCategories.length === 0) {
+                trendingCategoriesDiv.innerHTML = '<div style="text-align: center; color: #8b949e;">No categories yet</div>';
+            } else {
+                trendingCategoriesDiv.innerHTML = sortedCategories.map(([category, stats]) => `
+                    <div class="summary-stat">
+                        <span class="summary-label">${category}</span>
+                        <span class="summary-value">${stats.skillCount} skills</span>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Error loading trending categories:', error);
+            document.getElementById('trendingCategories').innerHTML = '<div class="error">Error loading categories</div>';
+        }
+    }
+
+    function showRefreshIndicator() {
+        document.getElementById('refreshIndicator').classList.add('visible');
+    }
+
+    function hideRefreshIndicator() {
+        setTimeout(() => {
+            document.getElementById('refreshIndicator').classList.remove('visible');
+        }, 500);
+    }
+
+    // Event listeners
+    document.addEventListener('click', function(e) {
+        // Sort button clicks
+        if (e.target.classList.contains('sort-btn')) {
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            currentSort = e.target.getAttribute('data-sort');
+            loadSkills();
+        }
+        
+        // Category button clicks
+        if (e.target.classList.contains('category-filter')) {
+            document.querySelectorAll('.category-filter').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            currentCategory = e.target.getAttribute('data-category');
+            renderSkills();
+        }
+    });
+
+    // Auto-refresh every 2 minutes
+    setInterval(loadAllData, 120000);
+
+    // Initial load
+    window.addEventListener('load', loadAllData);
+</script>
