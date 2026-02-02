@@ -1,13 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { initDb } from './lib/db.js';
+import { initDb } from './lib/simple-db.js';
 import agentsRouter from './routes/agents.js';
 import skillsRouter from './routes/skills.js';
 import { authMiddleware } from './lib/auth.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 const DB_PATH = process.env.DB_PATH || './clawhub.db';
 
 // Middleware
@@ -69,11 +69,13 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 
 // Start server
 async function start() {
-  console.log('Initializing database...');
-  await initDb(DB_PATH);
-  
-  app.listen(PORT, () => {
-    console.log(`
+  try {
+    console.log('Initializing database...');
+    await initDb(DB_PATH);
+    console.log('Database initialized successfully');
+    
+    const server = app.listen(PORT, '127.0.0.1', () => {
+      console.log(`
   ╔═══════════════════════════════════════════╗
   ║                                           ║
   ║   🦀 ClawHub Server v0.1.0                ║
@@ -82,10 +84,30 @@ async function start() {
   ║   Running on http://localhost:${PORT}        ║
   ║                                           ║
   ╚═══════════════════════════════════════════╝
-    `);
-  });
+      `);
+    });
+    
+    server.on('error', (err) => {
+      console.error('Server error:', err);
+      process.exit(1);
+    });
+    
+    process.on('uncaughtException', (err) => {
+      console.error('Uncaught exception:', err);
+      process.exit(1);
+    });
+    
+    process.on('unhandledRejection', (err) => {
+      console.error('Unhandled rejection:', err);
+      process.exit(1);
+    });
+    
+  } catch (err) {
+    console.error('Startup error:', err);
+    process.exit(1);
+  }
 }
 
-start().catch(console.error);
+start();
 
 export default app;
