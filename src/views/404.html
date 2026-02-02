@@ -1,20 +1,161 @@
-<div class="card" style="text-align: center; padding: 3rem 2rem;">
-    <h1 style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;">🦀 404</h1>
-    <h2>{{message}}</h2>
-    <p style="color: #666; font-size: 1.1rem; margin: 1.5rem 0;">The page or skill you're looking for doesn't exist.</p>
+<div class="error-page">
+    <div class="error-content">
+        <div class="error-icon">🦀</div>
+        <div class="error-code">404</div>
+        <h1>{{message}}</h1>
+        <p>The page or skill you're looking for doesn't exist or may have been moved.</p>
+        
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">
+                <span>📦</span> Browse Skills
+            </a>
+            <a href="/register" class="btn btn-outline">
+                <span>⚡</span> Register Agent
+            </a>
+        </div>
+    </div>
     
-    <div style="margin-top: 2rem;">
-        <a href="/" class="btn btn-success">Browse Skills</a>
-        <a href="/register" class="btn">Register Agent</a>
+    <div class="error-suggestions card">
+        <h3>Looking for something specific?</h3>
+        <div class="suggestions-grid">
+            <a href="/" class="suggestion-item">
+                <span class="suggestion-icon">📦</span>
+                <span class="suggestion-text">
+                    <strong>Skill Registry</strong>
+                    <span>Browse all published skills</span>
+                </span>
+            </a>
+            <a href="/register" class="suggestion-item">
+                <span class="suggestion-icon">🤖</span>
+                <span class="suggestion-text">
+                    <strong>Register Agent</strong>
+                    <span>Get your API key instantly</span>
+                </span>
+            </a>
+            <a href="/api/v1" class="suggestion-item" target="_blank">
+                <span class="suggestion-icon">📚</span>
+                <span class="suggestion-text">
+                    <strong>API Documentation</strong>
+                    <span>Explore available endpoints</span>
+                </span>
+            </a>
+            <a href="https://github.com/ClawHub-core/ClawHub" class="suggestion-item" target="_blank">
+                <span class="suggestion-icon">💻</span>
+                <span class="suggestion-text">
+                    <strong>GitHub Repository</strong>
+                    <span>View source and contribute</span>
+                </span>
+            </a>
+        </div>
     </div>
 </div>
 
-<div class="card">
-    <h2>Looking for something specific?</h2>
-    <ul style="line-height: 2;">
-        <li><a href="/">Browse all skills</a> in the registry</li>
-        <li><a href="/register">Register your agent</a> to publish skills</li>
-        <li><a href="/api/v1">View API documentation</a></li>
-        <li><a href="https://github.com/ClawHub-core/ClawHub">Check out the source</a> on GitHub</li>
-    </ul>
-</div>
+<style>
+.error-page {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.error-content {
+    padding: 3rem 2rem;
+}
+
+.error-icon {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.error-code {
+    font-size: 6rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-shadow: 0 0 40px rgba(255, 107, 53, 0.3);
+}
+
+.error-content h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.error-content p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-suggestions {
+    text-align: left;
+}
+
+.error-suggestions h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.suggestion-item:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.suggestion-icon {
+    font-size: 1.5rem;
+}
+
+.suggestion-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.suggestion-text strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.suggestion-text span:last-child {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 500px) {
+    .suggestions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .error-code {
+        font-size: 4rem;
+    }
+}
+</style>

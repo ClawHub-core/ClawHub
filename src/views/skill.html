@@ -1,96 +1,163 @@
-<div class="card">
-    <div class="skill-header" style="margin-bottom: 1rem;">
-        <div>
-            <h1>{{skill.full_name}}</h1>
-            <p style="font-size: 1.1rem; color: #666; margin: 0.5rem 0;">{{skill.description}}</p>
+<div class="skill-page">
+    <!-- Skill Header -->
+    <div class="card skill-hero">
+        <div class="skill-hero-content">
+            <div class="skill-info">
+                <div class="skill-badge">
+                    <span class="skill-category">{{skill.category}}</span>
+                    <span class="skill-version">v{{skill.version}}</span>
+                </div>
+                <h1 class="skill-title">{{skill.full_name}}</h1>
+                <p class="skill-description">{{skill.description}}</p>
+                
+                <div class="skill-capabilities">
+                    {{#each skill.capabilities}}
+                    <span class="capability">{{this}}</span>
+                    {{/each}}
+                </div>
+            </div>
+            
+            <div class="skill-stats">
+                <div class="stat-card">
+                    <span class="stat-icon">★</span>
+                    <span class="stat-number">{{skill.score}}</span>
+                    <span class="stat-label">Score</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-number">{{skill.star_count}}</span>
+                    <span class="stat-label">Stars</span>
+                </div>
+                {{#if skill.zap_total_sats}}
+                <div class="stat-card">
+                    <span class="stat-icon">⚡</span>
+                    <span class="stat-number">{{skill.zap_total_sats}}</span>
+                    <span class="stat-label">Sats</span>
+                </div>
+                {{/if}}
+            </div>
         </div>
-        <div style="text-align: right;">
-            <div class="skill-version" style="margin-bottom: 0.5rem;">v{{skill.version}}</div>
-            <div class="score" style="font-size: 1.2rem;">★ {{skill.score}}</div>
-        </div>
-    </div>
-    
-    <div class="skill-meta" style="margin-bottom: 2rem;">
-        <div>
-            {{#each skill.capabilities}}
-            <span class="capability">{{this}}</span>
-            {{/each}}
-        </div>
-        <div style="margin-left: auto; text-align: right;">
-            <div><strong>{{skill.star_count}}</strong> stars</div>
-            {{#if skill.zap_total_sats}}
-            <div><strong>⚡ {{skill.zap_total_sats}}</strong> sats</div>
+        
+        <div class="skill-actions">
+            {{#if skill.repo_url}}
+            <a href="{{skill.repo_url}}" target="_blank" class="btn btn-outline">
+                <span>📦</span> View Source
+            </a>
             {{/if}}
-            <div>Updated {{skill.updated_at}}</div>
+            <a href="{{skill.agent_card_url}}" target="_blank" class="btn btn-outline">
+                <span>🤝</span> A2A Agent Card
+            </a>
+            <button id="starBtn" class="btn btn-primary">
+                <span>⭐</span> Star Skill
+            </button>
+        </div>
+        
+        <div class="skill-meta-bar">
+            {{#if skill.api_base}}
+            <div class="meta-item">
+                <span class="meta-label">API Base:</span>
+                <a href="{{skill.api_base}}" target="_blank">{{skill.api_base}}</a>
+            </div>
+            {{/if}}
+            {{#if skill.homepage}}
+            <div class="meta-item">
+                <span class="meta-label">Homepage:</span>
+                <a href="{{skill.homepage}}" target="_blank">{{skill.homepage}}</a>
+            </div>
+            {{/if}}
+            <div class="meta-item">
+                <span class="meta-label">Updated:</span>
+                <span>{{skill.updated_at}}</span>
+            </div>
         </div>
     </div>
     
-    {{#if skill.api_base}}
-    <div style="background: #e3f2fd; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-        <strong>API Base:</strong> <a href="{{skill.api_base}}" target="_blank">{{skill.api_base}}</a>
+    <!-- Documentation -->
+    {{#if skill.skill_md}}
+    <div class="card">
+        <h2><span class="section-icon">📄</span> Documentation</h2>
+        <div class="skill-docs">
+            <pre>{{skill.skill_md_content}}</pre>
+        </div>
     </div>
     {{/if}}
     
-    {{#if skill.homepage}}
-    <div style="background: #f3e5f5; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-        <strong>Homepage:</strong> <a href="{{skill.homepage}}" target="_blank">{{skill.homepage}}</a>
-    </div>
-    {{/if}}
-    
-    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-        {{#if skill.repo_url}}
-        <a href="{{skill.repo_url}}" target="_blank" class="btn">📦 View Source</a>
-        {{/if}}
-        <a href="{{skill.agent_card_url}}" target="_blank" class="btn">🔗 A2A Agent Card</a>
-        <button id="starBtn" class="btn btn-success">⭐ Star Skill</button>
-    </div>
-</div>
-
-{{#if skill.skill_md}}
-<div class="card">
-    <h2>Documentation</h2>
-    <div id="skillDocs" style="line-height: 1.8;">
-        <pre style="white-space: pre-wrap; background: #f8f9fa; padding: 1.5rem; border-radius: 6px; overflow-x: auto;">{{skill.skill_md_content}}</pre>
-    </div>
-</div>
-{{/if}}
-
-<div class="card">
-    <h2>Integration</h2>
-    
-    <h3>cURL</h3>
-    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code># Star this skill
-curl -X POST https://clawhub.dev/api/v1/skills/{{skill.full_name}}/star \
+    <!-- Integration Guide -->
+    <div class="card">
+        <h2><span class="section-icon">🔧</span> Integration</h2>
+        
+        <div class="integration-tabs">
+            <button class="tab-btn active" data-tab="curl">cURL</button>
+            <button class="tab-btn" data-tab="a2a">A2A Card</button>
+            {{#if skill.capabilities}}
+            <button class="tab-btn" data-tab="caps">Capabilities</button>
+            {{/if}}
+        </div>
+        
+        <div id="tab-curl" class="tab-content active">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Star this skill</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X POST https://clawhub.dev/api/v1/skills/{{skill.full_name}}/star \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"zap_sats": 100}'</code></pre>
-    
-    <h3>A2A Agent Card</h3>
-    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code># Get A2A Agent Card
-curl https://clawhub.dev/api/v1/skills/{{skill.full_name}}/.well-known/agent-card.json</code></pre>
-    
-    {{#if skill.capabilities}}
-    <h3>Capabilities</h3>
-    <ul>
-        {{#each skill.capabilities}}
-        <li><strong>{{this}}</strong></li>
-        {{/each}}
-    </ul>
-    {{/if}}
-    
-    {{#if skill.dependencies}}
-    <h3>Dependencies</h3>
-    <ul>
-        {{#each skill.dependencies}}
-        <li><code>{{this}}</code></li>
-        {{/each}}
-    </ul>
-    {{/if}}
+            </div>
+        </div>
+        
+        <div id="tab-a2a" class="tab-content">
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Get A2A Agent Card</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl https://clawhub.dev/api/v1/skills/{{skill.full_name}}/.well-known/agent-card.json</code></pre>
+            </div>
+            <p class="code-note">Agent cards follow Google's A2A protocol for inter-agent discovery and communication.</p>
+        </div>
+        
+        {{#if skill.capabilities}}
+        <div id="tab-caps" class="tab-content">
+            <div class="caps-grid">
+                {{#each skill.capabilities}}
+                <div class="cap-item">
+                    <span class="cap-icon">⚙️</span>
+                    <span class="cap-name">{{this}}</span>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+        
+        {{#if skill.dependencies}}
+        <div class="dependencies-section">
+            <h3>Dependencies</h3>
+            <div class="deps-list">
+                {{#each skill.dependencies}}
+                <code class="dep-item">{{this}}</code>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+    </div>
 </div>
 
 <script>
 const skillData = {{{skill_json}}};
 
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+// Star skill
 document.getElementById('starBtn').addEventListener('click', async () => {
     const apiKey = prompt('Enter your API key to star this skill:');
     if (!apiKey) return;
@@ -113,7 +180,7 @@ document.getElementById('starBtn').addEventListener('click', async () => {
         
         if (response.ok) {
             alert(`✅ ${result.message}\nNew score: ${result.score}`);
-            location.reload(); // Refresh to show updated stats
+            location.reload();
         } else {
             alert(`❌ Error: ${result.error}`);
         }
@@ -121,32 +188,322 @@ document.getElementById('starBtn').addEventListener('click', async () => {
         alert(`❌ Error: ${err.message}`);
     }
 });
+
+// Copy code
+function copyCode(btn) {
+    const code = btn.closest('.code-block').querySelector('code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    });
+}
 </script>
 
 <style>
-.skill-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+.skill-page {
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-.skill-meta {
+/* Skill Hero */
+.skill-hero {
+    padding: 2rem;
+}
+
+.skill-hero-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.skill-info {
+    flex: 1;
+}
+
+.skill-badge {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.skill-category {
+    background: var(--accent-tertiary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.skill-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-secondary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.skill-description {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.skill-capabilities {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Stats */
+.skill-stats {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    min-width: 80px;
+}
+
+.stat-icon {
+    font-size: 1.25rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-primary);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Actions */
+.skill-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Meta Bar */
+.skill-meta-bar {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    font-size: 0.85rem;
+}
+
+.meta-label {
+    color: var(--text-muted);
+    margin-right: 0.4rem;
+}
+
+/* Documentation */
+.skill-docs {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.skill-docs pre {
+    margin: 0;
+    padding: 1.5rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+/* Integration Tabs */
+.integration-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.tab-btn.active {
+    color: var(--accent-primary);
+    background: rgba(255, 107, 53, 0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Code Blocks */
+.code-block {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.code-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0,0,0,0.2);
+    font-size: 0.75rem;
+    color: var(--text-muted);
 }
 
-@media (max-width: 768px) {
-    .skill-header {
+.copy-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.code-block code {
+    font-size: 0.8rem;
+    color: var(--accent-secondary);
+    line-height: 1.6;
+}
+
+.code-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Capabilities Grid */
+.caps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.cap-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.cap-icon {
+    font-size: 1.2rem;
+}
+
+.cap-name {
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+/* Dependencies */
+.dependencies-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.dependencies-section h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.deps-list {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.dep-item {
+    background: var(--bg-secondary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Section styling */
+.card h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-icon {
+    font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+    .skill-hero-content {
         flex-direction: column;
-        gap: 1rem;
     }
     
-    .skill-meta {
-        flex-direction: column;
-        align-items: flex-start;
+    .skill-stats {
+        justify-content: flex-start;
+    }
+    
+    .skill-title {
+        font-size: 1.4rem;
     }
 }
 </style>
