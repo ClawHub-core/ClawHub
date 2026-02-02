@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { initDb } from './lib/simple-db.js';
 import agentsRouter from './routes/agents.js';
 import skillsRouter from './routes/skills.js';
+import webRouter from './routes/web.js';
 import { authMiddleware } from './lib/auth.js';
 
 const app = express();
@@ -39,7 +40,10 @@ app.get('/api/v1', (req, res) => {
   });
 });
 
-// Routes
+// Web routes (serve HTML pages)
+app.use('/', webRouter);
+
+// API routes
 app.use('/api/v1/agents', agentsRouter);
 app.use('/api/v1/skills', skillsRouter);
 
@@ -57,8 +61,23 @@ app.get('/api/v1/agents/me', authMiddleware, (req, res) => {
 });
 
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not found' });
+app.use(async (req, res) => {
+  // For API routes, return JSON
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  
+  // For web routes, return HTML 404 page
+  try {
+    const { renderTemplate } = await import('./lib/templates.js');
+    const html = renderTemplate('404', {
+      title: 'Page Not Found',
+      message: 'Page Not Found'
+    });
+    res.status(404).send(html);
+  } catch (err) {
+    res.status(404).send('<h1>404 - Page Not Found</h1>');
+  }
 });
 
 // Error handler
