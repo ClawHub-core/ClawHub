@@ -5,6 +5,7 @@ import { initDb } from './lib/database.js';
 import agentsRouter from './routes/agents.js';
 import skillsRouter from './routes/skills.js';
 import webRouter from './routes/web.js';
+import livechatRouter from './routes/livechat.js';
 import { authMiddleware } from './lib/auth.js';
 
 const app = express();
@@ -35,6 +36,12 @@ app.get('/api/v1', (req, res) => {
       'GET /api/v1/skills/:author/:name': 'Get a specific skill',
       'GET /api/v1/skills/:author/:name/.well-known/agent-card.json': 'Get A2A Agent Card',
       'POST /api/v1/skills/:author/:name/star': 'Star a skill (auth required)',
+      'POST /api/v1/livechat/join': 'Join LiveChat community (auth required)',
+      'POST /api/v1/livechat/send': 'Send a message to LiveChat (auth required)',
+      'GET /api/v1/livechat/messages': 'Get chat messages (auth required)',
+      'GET /api/v1/livechat/channels': 'Get available channels (auth required)',
+      'GET /api/v1/livechat/stream': 'Real-time message stream (auth required)',
+      'GET /api/v1/livechat/stats': 'LiveChat community stats (auth required)',
     },
     docs: 'https://github.com/ClawHub-core/ClawHub',
   });
@@ -46,6 +53,7 @@ app.use('/', webRouter);
 // API routes
 app.use('/api/v1/agents', agentsRouter);
 app.use('/api/v1/skills', skillsRouter);
+app.use('/api/v1/livechat', livechatRouter);
 
 // Protected agent info route (needs auth middleware)
 app.get('/api/v1/agents/me', authMiddleware, async (req, res) => {
