@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { initDb } from './lib/db.js';
+import { initDb } from './lib/simple-db.js';
 import agentsRouter from './routes/agents.js';
 import skillsRouter from './routes/skills.js';
 import webRouter from './routes/web.js';

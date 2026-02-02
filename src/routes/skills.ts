@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createSkill, getSkillByFullName, getSkillById, querySkills, updateSkill, starSkill } from '../lib/db.js';
+import { createSkill, getSkillByFullName, getSkillById, querySkills, updateSkill, starSkill } from '../lib/simple-db.js';
 import { parseSkillMd, fetchSkillMd } from '../lib/parser.js';
 import { generateAgentCard, serializeAgentCard } from '../lib/a2a.js';
 import { authMiddleware, optionalAuthMiddleware } from '../lib/auth.js';
