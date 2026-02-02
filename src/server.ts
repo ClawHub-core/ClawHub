@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { initDb } from './lib/simple-db.js';
+import { initDb } from './lib/database.js';
 import agentsRouter from './routes/agents.js';
 import skillsRouter from './routes/skills.js';
 import webRouter from './routes/web.js';
@@ -48,7 +48,7 @@ app.use('/api/v1/agents', agentsRouter);
 app.use('/api/v1/skills', skillsRouter);
 
 // Protected agent info route (needs auth middleware)
-app.get('/api/v1/agents/me', authMiddleware, (req, res) => {
+app.get('/api/v1/agents/me', authMiddleware, async (req, res) => {
   const agent = (req as any).agent;
   res.json({
     id: agent.id,

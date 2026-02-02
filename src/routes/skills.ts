@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createSkill, getSkillByFullName, getSkillById, querySkills, updateSkill, starSkill } from '../lib/simple-db.js';
+import { createSkill, getSkillByFullName, getSkillById, querySkills, updateSkill, starSkill } from '../lib/database.js';
 import { parseSkillMd, fetchSkillMd } from '../lib/parser.js';
 import { generateAgentCard, serializeAgentCard } from '../lib/a2a.js';
 import { authMiddleware, optionalAuthMiddleware } from '../lib/auth.js';
@@ -13,7 +13,7 @@ const BASE_URL = process.env.BASE_URL || 'https://clawhub.dev';
  * GET /api/v1/skills
  * Query/search skills
  */
-router.get('/', optionalAuthMiddleware, (req, res) => {
+router.get('/', optionalAuthMiddleware, async (req, res) => {
   try {
     const params: SkillQueryParams = {
       capability: req.query.capability as string,
@@ -25,7 +25,7 @@ router.get('/', optionalAuthMiddleware, (req, res) => {
       sort: req.query.sort as SkillQueryParams['sort'],
     };
 
-    const skills = querySkills(params);
+    const skills = await querySkills(params);
     
     res.json({
       skills: skills.map(s => ({
@@ -83,15 +83,14 @@ router.post('/', authMiddleware, async (req, res) => {
     const fullName = `@${agent.username}/${meta.name}`;
 
     // Check if skill already exists
-    const existing = getSkillByFullName(fullName);
+    const existing = await getSkillByFullName(fullName);
     if (existing) {
       // Update existing skill
-      updateSkill(existing.id, {
+      await updateSkill(existing.id, {
         version: meta.version,
         description: meta.description,
         category: meta.metadata?.category,
-        capabilities: JSON.stringify(meta.capabilities || []),
-        dependencies: JSON.stringify(meta.dependencies || []),
+        capabilities: meta.capabilities || [],
         interface_type: meta.interface,
         api_base: meta.metadata?.api_base,
         homepage: meta.homepage,
@@ -100,7 +99,7 @@ router.post('/', authMiddleware, async (req, res) => {
         skill_md_content: fetchResult.raw,
       });
 
-      const updated = getSkillById(existing.id)!;
+      const updated = await getSkillById(existing.id)!;
       return res.json({
         message: 'Skill updated',
         skill: formatSkillResponse(updated, agent.username),
@@ -108,7 +107,7 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 
     // Create new skill
-    const skill = createSkill({
+    const skill = await createSkill({
       author_id: agent.id,
       name: meta.name,
       version: meta.version,
@@ -138,10 +137,10 @@ router.post('/', authMiddleware, async (req, res) => {
  * GET /api/v1/skills/:fullName
  * Get a specific skill by @author/name
  */
-router.get('/:author/:name', optionalAuthMiddleware, (req, res) => {
+router.get('/:author/:name', optionalAuthMiddleware, async (req, res) => {
   try {
     const fullName = `@${req.params.author}/${req.params.name}`;
-    const skill = getSkillByFullName(fullName);
+    const skill = await getSkillByFullName(fullName);
 
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
@@ -158,10 +157,10 @@ router.get('/:author/:name', optionalAuthMiddleware, (req, res) => {
  * GET /api/v1/skills/:author/:name/.well-known/agent-card.json
  * Get A2A Agent Card for a skill
  */
-router.get('/:author/:name/.well-known/agent-card.json', (req, res) => {
+router.get('/:author/:name/.well-known/agent-card.json', async (req, res) => {
   try {
     const fullName = `@${req.params.author}/${req.params.name}`;
-    const skill = getSkillByFullName(fullName);
+    const skill = await getSkillByFullName(fullName);
 
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
@@ -194,20 +193,20 @@ router.get('/:author/:name/.well-known/agent-card.json', (req, res) => {
  * POST /api/v1/skills/:author/:name/star
  * Star a skill (optionally with zap)
  */
-router.post('/:author/:name/star', authMiddleware, (req, res) => {
+router.post('/:author/:name/star', authMiddleware, async (req, res) => {
   try {
     const agent = (req as any).agent as Agent;
     const fullName = `@${req.params.author}/${req.params.name}`;
-    const skill = getSkillByFullName(fullName);
+    const skill = await getSkillByFullName(fullName);
 
     if (!skill) {
       return res.status(404).json({ error: 'Skill not found' });
     }
 
     const zapSats = parseInt(req.body.zap_sats) || 0;
-    starSkill(skill.id, agent.id, zapSats);
+    await starSkill(skill.id, agent.id, zapSats);
 
-    const updated = getSkillById(skill.id)!;
+    const updated = await getSkillById(skill.id)!;
     res.json({
       message: zapSats > 0 ? `Starred with ${zapSats} sats` : 'Starred',
       star_count: updated.star_count,

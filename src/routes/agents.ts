@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createAgent, getAgentByUsername } from '../lib/simple-db.js';
+import { createAgent, getAgentByUsername } from '../lib/database.js';
 import { generateApiKey, hashApiKey } from '../lib/auth.js';
 import type { RegisterAgentRequest } from '../types.js';
 
@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if username exists
-    const existing = getAgentByUsername(username);
+    const existing = await getAgentByUsername(username);
     if (existing) {
       return res.status(409).json({ error: 'Username already taken' });
     }
@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
     const apiKeyHash = hashApiKey(apiKey);
 
     // Create agent
-    const agent = createAgent(username, apiKeyHash, nostr_pubkey, colony_id);
+    const agent = await createAgent(username, apiKeyHash, nostr_pubkey, colony_id);
 
     // Return with API key (only time it's shown)
     res.status(201).json({

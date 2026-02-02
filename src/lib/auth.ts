@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
-import { getAgentByApiKeyHash } from './simple-db.js';
+import { getAgentByApiKeyHash } from './database.js';
 
 /**
  * Generate a new API key
@@ -20,7 +20,7 @@ export function hashApiKey(apiKey: string): string {
 /**
  * Express middleware to authenticate requests via API key
  */
-export function authMiddleware(req: Request, res: Response, next: NextFunction) {
+export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   
   if (!authHeader?.startsWith('Bearer ')) {
@@ -29,7 +29,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
   const apiKey = authHeader.slice(7);
   const hash = hashApiKey(apiKey);
-  const agent = getAgentByApiKeyHash(hash);
+  const agent = await getAgentByApiKeyHash(hash);
 
   if (!agent) {
     return res.status(401).json({ error: 'Invalid API key' });
@@ -43,13 +43,13 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 /**
  * Optional auth - doesn't fail if no key provided
  */
-export function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+export async function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   
   if (authHeader?.startsWith('Bearer ')) {
     const apiKey = authHeader.slice(7);
     const hash = hashApiKey(apiKey);
-    const agent = getAgentByApiKeyHash(hash);
+    const agent = await getAgentByApiKeyHash(hash);
     if (agent) {
       (req as any).agent = agent;
     }
