@@ -3,6 +3,7 @@ import { createSkill, getSkillByFullName, getSkillById, querySkills, updateSkill
 import { parseSkillMd, fetchSkillMd } from '../lib/parser.js';
 import { generateAgentCard, serializeAgentCard } from '../lib/a2a.js';
 import { authMiddleware, optionalAuthMiddleware } from '../lib/auth.js';
+import { memoryVault } from '../lib/memoryvault.js';
 import type { Agent, SkillQueryParams } from '../types.js';
 
 const router = Router();
@@ -130,6 +131,15 @@ router.post('/', authMiddleware, async (req, res) => {
       message: 'Skill published',
       skill: formatSkillResponse(skill, agent.username),
     });
+
+    // Store skill template in MemoryVault for future reference
+    try {
+      await memoryVault.storeSkillTemplate(skill, true);
+      console.log(`Skill template stored in MemoryVault: ${skill.name}`);
+    } catch (memoryError) {
+      console.log(`MemoryVault storage failed (non-critical): ${memoryError}`);
+      // Don't fail the skill publishing if MemoryVault is down
+    }
   } catch (err) {
     console.error('Error publishing skill:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -255,5 +265,59 @@ function formatSkillResponse(skill: any, author: string, includeContent = false)
 
   return response;
 }
+
+/**
+ * GET /api/v1/skills/memories/search
+ * Search ClawHub knowledge in MemoryVault
+ */
+router.get('/memories/search', optionalAuthMiddleware, async (req, res) => {
+  try {
+    const query = req.query.q as string;
+    if (!query) {
+      return res.status(400).json({ error: 'Query parameter "q" is required' });
+    }
+
+    const result = await memoryVault.searchMemories(`clawhub ${query}`);
+    
+    if (result.success) {
+      res.json({
+        query,
+        results: result.data?.results || [],
+        total: result.data?.total || 0,
+        source: 'MemoryVault'
+      });
+    } else {
+      res.status(500).json({ error: result.error || 'Search failed' });
+    }
+  } catch (err) {
+    console.error('Error searching memories:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * GET /api/v1/skills/memories/:key
+ * Get specific ClawHub knowledge from MemoryVault
+ */
+router.get('/memories/:key', optionalAuthMiddleware, async (req, res) => {
+  try {
+    const key = req.params.key;
+    const result = await memoryVault.getMemory(`clawhub-${key}`);
+    
+    if (result.success) {
+      res.json({
+        key: `clawhub-${key}`,
+        value: result.data?.value,
+        tags: result.data?.tags,
+        source: 'MemoryVault'
+      });
+    } else {
+      res.status(404).json({ error: result.error || 'Memory not found' });
+    }
+  } catch (err) {
+    console.error('Error getting memory:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 export default router;

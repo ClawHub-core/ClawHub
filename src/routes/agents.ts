@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createAgent, getAgentByUsername } from '../lib/database.js';
 import { generateApiKey, hashApiKey } from '../lib/auth.js';
+import { memoryVault } from '../lib/memoryvault.js';
 import type { RegisterAgentRequest } from '../types.js';
 
 const router = Router();
@@ -41,6 +42,15 @@ router.post('/register', async (req, res) => {
       created_at: agent.created_at,
       message: 'Save this API key - it will not be shown again.',
     });
+
+    // Store agent configuration in MemoryVault for reference
+    try {
+      await memoryVault.storeAgentConfig(agent);
+      console.log(`Agent config stored in MemoryVault: ${agent.username}`);
+    } catch (memoryError) {
+      console.log(`MemoryVault storage failed (non-critical): ${memoryError}`);
+      // Don't fail the registration if MemoryVault is down
+    }
   } catch (err) {
     console.error('Error registering agent:', err);
     res.status(500).json({ error: 'Internal server error' });
