@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClawHub Skill Rankings - Star Ratings & Analytics</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 15px 0 0 0;
+            opacity: 0.9;
+            font-size: 18px;
+        }
+        .rankings-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .content-header {
+            background: #667eea;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .content-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .sort-btn {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .sort-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .sort-btn.active {
+            background: white;
+            color: #667eea;
+        }
+        .skills-list {
+            padding: 0;
+        }
+        .skill-card {
+            padding: 25px 30px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s;
+        }
+        .skill-card:hover {
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+        .skill-card:last-child {
+            border-bottom: none;
+        }
+        .skill-rank {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 20px;
+            font-size: 18px;
+        }
+        .skill-rank.top3 {
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+        }
+        .skill-info {
+            display: inline-block;
+            vertical-align: top;
+            width: calc(100% - 250px);
+        }
+        .skill-name {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .skill-author {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .skill-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .skill-tag {
+            background: #e8f4f8;
+            color: #2980b9;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .skill-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .skill-metrics {
+            float: right;
+            text-align: right;
+            padding-top: 10px;
+        }
+        .star-rating {
+            font-size: 28px;
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .metric-label {
+            color: #666;
+        }
+        .metric-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .sidebar-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .sidebar-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .sidebar-content {
+            padding: 20px;
+        }
+        .summary-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .summary-stat:last-child {
+            border-bottom: none;
+        }
+        .summary-label {
+            color: #666;
+        }
+        .summary-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .top-authors {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .author-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .author-item:last-child {
+            border-bottom: none;
+        }
+        .author-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .author-stats {
+            font-size: 12px;
+            color: #666;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #e74c3c;
+        }
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .refresh-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .category-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .category-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        .category-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⭐ ClawHub Skill Rankings</h1>
+            <p>Discover the most popular and highest-rated AI agent skills</p>
+        </div>
+
+        <div class="category-filter">
+            <button class="category-btn active" data-category="all">All Categories</button>
+            <button class="category-btn" data-category="utilities">Utilities</button>
+            <button class="category-btn" data-category="finance">Finance</button>
+            <button class="category-btn" data-category="ai">AI & ML</button>
+            <button class="category-btn" data-category="social">Social</button>
+            <button class="category-btn" data-category="infrastructure">Infrastructure</button>
+        </div>
+
+        <div class="rankings-grid">
+            <div class="main-content">
+                <div class="content-header">
+                    <div class="content-title">Skill Rankings</div>
+                    <div class="sort-controls">
+                        <button class="sort-btn active" data-sort="stars">⭐ Most Stars</button>
+                        <button class="sort-btn" data-sort="recent">🕒 Recent</button>
+                        <button class="sort-btn" data-sort="score">🏆 Best Score</button>
+                    </div>
+                </div>
+                <div class="skills-list" id="skillsList">
+                    <div class="loading">Loading skill rankings...</div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-header">📊 Platform Summary</div>
+                    <div class="sidebar-content" id="platformSummary">
+                        <div class="summary-stat">
+                            <span class="summary-label">Total Skills</span>
+                            <span class="summary-value" id="totalSkillsCount">-</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-label">Total Stars</span>
+                            <span class="summary-value" id="totalStarsCount">-</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-label">Active Developers</span>
+                            <span class="summary-value" id="activeDevelopers">-</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-label">Categories</span>
+                            <span class="summary-value" id="totalCategories">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-header">🏆 Top Authors</div>
+                    <div class="sidebar-content">
+                        <ul class="top-authors" id="topAuthors">
+                            <li class="loading">Loading...</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-header">🔥 Trending Categories</div>
+                    <div class="sidebar-content" id="trendingCategories">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadAllData()" title="Refresh Data">🔄</button>
+
+    <script>
+        let currentSort = 'stars';
+        let currentCategory = 'all';
+        let allSkills = [];
+        
+        const API_BASE = 'http://localhost:3000/api/v1';
+
+        async function loadAllData() {
+            try {
+                await Promise.all([
+                    loadSkills(),
+                    loadPlatformSummary(),
+                    loadTopAuthors(),
+                    loadTrendingCategories()
+                ]);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('skillsList').innerHTML = '<div class="error">Error loading skill data</div>';
+            }
+        }
+
+        async function loadSkills() {
+            try {
+                const response = await fetch(`${API_BASE}/skills?limit=100&sort=${currentSort}`);
+                if (!response.ok) throw new Error('Failed to fetch skills');
+                
+                const data = await response.json();
+                allSkills = data.skills || [];
+                
+                renderSkills();
+            } catch (error) {
+                console.error('Error loading skills:', error);
+                document.getElementById('skillsList').innerHTML = '<div class="error">Error loading skills</div>';
+            }
+        }
+
+        function renderSkills() {
+            let filteredSkills = allSkills;
+            
+            // Filter by category
+            if (currentCategory !== 'all') {
+                filteredSkills = allSkills.filter(skill => 
+                    skill.category === currentCategory
+                );
+            }
+
+            const skillsList = document.getElementById('skillsList');
+            
+            if (filteredSkills.length === 0) {
+                skillsList.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">No skills found for this category</div>';
+                return;
+            }
+
+            skillsList.innerHTML = filteredSkills.map((skill, index) => {
+                const capabilities = JSON.parse(skill.capabilities || '[]');
+                const author = skill.full_name.split('/')[0].substring(1);
+                const createdDate = new Date(skill.created_at).toLocaleDateString();
+                
+                return `
+                    <div class="skill-card">
+                        <span class="skill-rank ${index < 3 ? 'top3' : ''}">${index + 1}</span>
+                        <div class="skill-info">
+                            <div class="skill-name">${skill.name}</div>
+                            <div class="skill-author">by ${author}</div>
+                            <div class="skill-description">${skill.description || 'No description available'}</div>
+                            <div class="skill-tags">
+                                ${capabilities.map(cap => `<span class="skill-tag">${cap}</span>`).join('')}
+                                ${skill.category ? `<span class="skill-tag">${skill.category}</span>` : ''}
+                            </div>
+                            <div class="skill-stats">
+                                <div class="stat-item">
+                                    <span>📅</span>
+                                    <span>Created ${createdDate}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>🔗</span>
+                                    <span>${skill.interface_type || 'API'}</span>
+                                </div>
+                                ${skill.license ? `
+                                <div class="stat-item">
+                                    <span>📄</span>
+                                    <span>${skill.license}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="skill-metrics">
+                            <div class="star-rating">⭐ ${skill.star_count || 0}</div>
+                            <div class="metric-row">
+                                <span class="metric-label">Score:</span>
+                                <span class="metric-value">${Math.round(skill.score || 0)}</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Version:</span>
+                                <span class="metric-value">${skill.version || '1.0.0'}</span>
+                            </div>
+                            ${skill.zap_total_sats ? `
+                            <div class="metric-row">
+                                <span class="metric-label">Zaps:</span>
+                                <span class="metric-value">${skill.zap_total_sats} sats</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadPlatformSummary() {
+            try {
+                const response = await fetch(`${API_BASE}/skills?limit=1000`);
+                if (!response.ok) throw new Error('Failed to fetch platform summary');
+                
+                const data = await response.json();
+                const skills = data.skills || [];
+                
+                const totalStars = skills.reduce((sum, skill) => sum + (skill.star_count || 0), 0);
+                const authors = new Set(skills.map(skill => 
+                    skill.full_name.split('/')[0].substring(1)
+                ));
+                const categories = new Set(skills.map(skill => skill.category).filter(Boolean));
+                
+                document.getElementById('totalSkillsCount').textContent = skills.length;
+                document.getElementById('totalStarsCount').textContent = totalStars;
+                document.getElementById('activeDevelopers').textContent = authors.size;
+                document.getElementById('totalCategories').textContent = categories.size;
+            } catch (error) {
+                console.error('Error loading platform summary:', error);
+            }
+        }
+
+        async function loadTopAuthors() {
+            try {
+                const response = await fetch(`${API_BASE}/skills?limit=1000`);
+                if (!response.ok) throw new Error('Failed to fetch authors');
+                
+                const data = await response.json();
+                const skills = data.skills || [];
+                
+                // Group by author
+                const authorStats = {};
+                skills.forEach(skill => {
+                    const author = skill.full_name.split('/')[0].substring(1);
+                    if (!authorStats[author]) {
+                        authorStats[author] = {
+                            skillCount: 0,
+                            totalStars: 0,
+                            totalScore: 0
+                        };
+                    }
+                    authorStats[author].skillCount++;
+                    authorStats[author].totalStars += skill.star_count || 0;
+                    authorStats[author].totalScore += skill.score || 0;
+                });
+                
+                // Sort by total stars
+                const sortedAuthors = Object.entries(authorStats)
+                    .sort(([,a], [,b]) => b.totalStars - a.totalStars)
+                    .slice(0, 10);
+                
+                const topAuthorsList = document.getElementById('topAuthors');
+                topAuthorsList.innerHTML = sortedAuthors.map(([author, stats]) => `
+                    <li class="author-item">
+                        <div>
+                            <div class="author-name">${author}</div>
+                            <div class="author-stats">${stats.skillCount} skills • ⭐ ${stats.totalStars} stars</div>
+                        </div>
+                    </li>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading top authors:', error);
+                document.getElementById('topAuthors').innerHTML = '<li class="error">Error loading authors</li>';
+            }
+        }
+
+        async function loadTrendingCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/skills?limit=1000`);
+                if (!response.ok) throw new Error('Failed to fetch categories');
+                
+                const data = await response.json();
+                const skills = data.skills || [];
+                
+                // Group by category
+                const categoryStats = {};
+                skills.forEach(skill => {
+                    const category = skill.category || 'uncategorized';
+                    if (!categoryStats[category]) {
+                        categoryStats[category] = {
+                            skillCount: 0,
+                            totalStars: 0
+                        };
+                    }
+                    categoryStats[category].skillCount++;
+                    categoryStats[category].totalStars += skill.star_count || 0;
+                });
+                
+                // Sort by skill count
+                const sortedCategories = Object.entries(categoryStats)
+                    .sort(([,a], [,b]) => b.skillCount - a.skillCount)
+                    .slice(0, 5);
+                
+                const trendingCategoriesDiv = document.getElementById('trendingCategories');
+                trendingCategoriesDiv.innerHTML = sortedCategories.map(([category, stats]) => `
+                    <div class="summary-stat">
+                        <span class="summary-label">${category}</span>
+                        <span class="summary-value">${stats.skillCount} skills</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading trending categories:', error);
+                document.getElementById('trendingCategories').innerHTML = '<div class="error">Error loading categories</div>';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('click', function(e) {
+            // Sort button clicks
+            if (e.target.classList.contains('sort-btn')) {
+                document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentSort = e.target.getAttribute('data-sort');
+                loadSkills();
+            }
+            
+            // Category button clicks
+            if (e.target.classList.contains('category-btn')) {
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentCategory = e.target.getAttribute('data-category');
+                renderSkills();
+            }
+        });
+
+        // Auto-refresh every 2 minutes
+        setInterval(loadAllData, 120000);
+
+        // Initial load
+        window.addEventListener('load', loadAllData);
+    </script>
+</body>
+</html>

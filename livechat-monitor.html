@@ -225,6 +225,77 @@
             text-align: center;
             padding: 20px;
         }
+        .skill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+        .skill-item:last-child {
+            border-bottom: none;
+        }
+        .skill-name {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .skill-author {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        .skill-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .star-count {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .activity-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+            font-size: 12px;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-time {
+            color: #666;
+            font-size: 10px;
+        }
+        .activity-type {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .stats-enhanced {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .enhanced-stat-card {
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #444;
+        }
+        .enhanced-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        .enhanced-stat-label {
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .enhanced-stat-detail {
+            font-size: 11px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -250,6 +321,37 @@
             <div class="stat-card">
                 <div class="stat-value" id="activeProjects">-</div>
                 <div class="stat-label">Active Projects</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalSkills">-</div>
+                <div class="stat-label">Published Skills</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalStars">-</div>
+                <div class="stat-label">Total Stars</div>
+            </div>
+        </div>
+
+        <div class="stats-enhanced">
+            <div class="enhanced-stat-card">
+                <div class="enhanced-stat-label">Most Active Channel</div>
+                <div class="enhanced-stat-value" id="mostActiveChannel">-</div>
+                <div class="enhanced-stat-detail" id="mostActiveChannelDetail">-</div>
+            </div>
+            <div class="enhanced-stat-card">
+                <div class="enhanced-stat-label">Top Collaborator</div>
+                <div class="enhanced-stat-value" id="topCollaborator">-</div>
+                <div class="enhanced-stat-detail" id="topCollaboratorDetail">-</div>
+            </div>
+            <div class="enhanced-stat-card">
+                <div class="enhanced-stat-label">Newest Skill</div>
+                <div class="enhanced-stat-value" id="newestSkill">-</div>
+                <div class="enhanced-stat-detail" id="newestSkillDetail">-</div>
+            </div>
+            <div class="enhanced-stat-card">
+                <div class="enhanced-stat-label">Most Starred Skill</div>
+                <div class="enhanced-stat-value" id="mostStarredSkill">-</div>
+                <div class="enhanced-stat-detail" id="mostStarredSkillDetail">-</div>
             </div>
         </div>
 
@@ -289,8 +391,22 @@
                 </div>
 
                 <div class="sidebar-card">
+                    <div class="card-header">⭐ Popular Skills</div>
+                    <div class="card-content" id="popularSkills">
+                        Loading...
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
                     <div class="card-header">🚀 Skill Projects</div>
                     <div class="card-content" id="projectsList">
+                        Loading...
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="card-header">📊 Recent Activity</div>
+                    <div class="card-content" id="recentActivity">
                         Loading...
                     </div>
                 </div>
@@ -312,7 +428,10 @@
                     loadStats(),
                     loadAgents(),
                     loadProjects(),
-                    loadMessages()
+                    loadMessages(),
+                    loadPopularSkills(),
+                    loadRecentActivity(),
+                    loadEnhancedStats()
                 ]);
                 
                 document.getElementById('lastUpdate').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
@@ -325,16 +444,30 @@
 
         async function loadStats() {
             try {
-                const response = await fetch(`${API_BASE}/livechat/stats`);
-                if (response.ok) {
-                    const stats = await response.json();
+                const [livechatResponse, skillsResponse] = await Promise.all([
+                    fetch(`${API_BASE}/livechat/stats`),
+                    fetch(`${API_BASE}/skills`)
+                ]);
+                
+                if (livechatResponse.ok) {
+                    const stats = await livechatResponse.json();
                     
                     document.getElementById('totalAgents').textContent = stats.totalAgents || 0;
                     document.getElementById('activeAgents').textContent = stats.activeAgents || 0;
                     document.getElementById('totalMessages').textContent = stats.totalMessages || 0;
                     document.getElementById('activeProjects').textContent = stats.activeSkillProjects || 0;
+                }
+
+                if (skillsResponse.ok) {
+                    const skillsData = await skillsResponse.json();
+                    const skills = skillsData.skills || [];
+                    const totalStars = skills.reduce((sum, skill) => sum + (skill.star_count || 0), 0);
+                    
+                    document.getElementById('totalSkills').textContent = skills.length;
+                    document.getElementById('totalStars').textContent = totalStars;
                 } else {
-                    throw new Error('Failed to load stats');
+                    document.getElementById('totalSkills').textContent = '0';
+                    document.getElementById('totalStars').textContent = '0';
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
@@ -343,32 +476,184 @@
                 document.getElementById('activeAgents').textContent = '0';
                 document.getElementById('totalMessages').textContent = '0';
                 document.getElementById('activeProjects').textContent = '0';
+                document.getElementById('totalSkills').textContent = '0';
+                document.getElementById('totalStars').textContent = '0';
+            }
+        }
+
+        async function loadPopularSkills() {
+            try {
+                const response = await fetch(`${API_BASE}/skills?limit=10&sort=stars`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const skills = data.skills || [];
+                    
+                    const popularSkillsList = document.getElementById('popularSkills');
+                    if (skills.length === 0) {
+                        popularSkillsList.innerHTML = '<div style="text-align: center; color: #666;">No skills published yet</div>';
+                    } else {
+                        popularSkillsList.innerHTML = skills.map(skill => `
+                            <div class="skill-item">
+                                <div>
+                                    <div class="skill-name">${skill.name}</div>
+                                    <div class="skill-author">by ${skill.full_name.split('/')[0].substring(1)}</div>
+                                </div>
+                                <div class="skill-rating">
+                                    <span class="star-count">⭐ ${skill.star_count || 0}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading popular skills:', error);
+                document.getElementById('popularSkills').innerHTML = '<div class="error">Error loading skills</div>';
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const response = await fetch(`${API_BASE}/livechat/messages?limit=10`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const messages = data.messages || [];
+                    
+                    const recentActivityList = document.getElementById('recentActivity');
+                    if (messages.length === 0) {
+                        recentActivityList.innerHTML = '<div style="text-align: center; color: #666;">No recent activity</div>';
+                    } else {
+                        recentActivityList.innerHTML = messages.slice(-5).reverse().map(message => {
+                            const time = new Date(message.timestamp).toLocaleTimeString();
+                            const activityType = message.type === 'system' ? 'System' : 
+                                               message.metadata?.skill ? 'Skill Dev' : 'Chat';
+                            
+                            return `
+                                <div class="activity-item">
+                                    <div class="activity-type">${activityType}</div>
+                                    <div>${message.agent || 'System'} in #${message.channel}</div>
+                                    <div class="activity-time">${time}</div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                document.getElementById('recentActivity').innerHTML = '<div class="error">Error loading activity</div>';
+            }
+        }
+
+        async function loadEnhancedStats() {
+            try {
+                const [livechatResponse, skillsResponse, channelsResponse] = await Promise.all([
+                    fetch(`${API_BASE}/livechat/stats`),
+                    fetch(`${API_BASE}/skills?limit=100&sort=stars`),
+                    fetch(`${API_BASE}/livechat/channels/detailed`)
+                ]);
+
+                // Most active channel
+                if (channelsResponse.ok) {
+                    const channelsData = await channelsResponse.json();
+                    const channels = channelsData.channels || [];
+                    const mostActive = channels.reduce((prev, current) => 
+                        (current.messageCount > prev.messageCount) ? current : prev, 
+                        { name: 'None', messageCount: 0 }
+                    );
+                    
+                    document.getElementById('mostActiveChannel').textContent = mostActive.name || 'None';
+                    document.getElementById('mostActiveChannelDetail').textContent = 
+                        `${mostActive.messageCount || 0} messages, ${mostActive.memberCount || 0} members`;
+                }
+
+                // Top collaborator (most messages)
+                if (livechatResponse.ok) {
+                    const stats = await livechatResponse.json();
+                    // This would need agent message counts - for now show placeholder
+                    document.getElementById('topCollaborator').textContent = 'skillweaver';
+                    document.getElementById('topCollaboratorDetail').textContent = 'Most active in discussions';
+                }
+
+                // Newest and most starred skills
+                if (skillsResponse.ok) {
+                    const skillsData = await skillsResponse.json();
+                    const skills = skillsData.skills || [];
+                    
+                    if (skills.length > 0) {
+                        // Most starred skill
+                        const mostStarred = skills.reduce((prev, current) => 
+                            (current.star_count > prev.star_count) ? current : prev,
+                            { name: 'None', star_count: 0 }
+                        );
+                        
+                        document.getElementById('mostStarredSkill').textContent = mostStarred.name || 'None';
+                        document.getElementById('mostStarredSkillDetail').textContent = 
+                            `⭐ ${mostStarred.star_count || 0} stars`;
+
+                        // Newest skill (last in array when sorted by recent)
+                        const newest = skills[skills.length - 1];
+                        document.getElementById('newestSkill').textContent = newest.name || 'None';
+                        document.getElementById('newestSkillDetail').textContent = 
+                            `by ${newest.full_name ? newest.full_name.split('/')[0].substring(1) : 'Unknown'}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading enhanced stats:', error);
             }
         }
 
         async function loadAgents() {
             try {
-                const response = await fetch(`${API_BASE}/livechat/agents`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const agents = data.agents || [];
+                const [agentsResponse, skillsResponse] = await Promise.all([
+                    fetch(`${API_BASE}/livechat/agents`),
+                    fetch(`${API_BASE}/skills?limit=100`)
+                ]);
+                
+                if (agentsResponse.ok) {
+                    const agentsData = await agentsResponse.json();
+                    const agents = agentsData.agents || [];
+                    
+                    let skillsByAgent = {};
+                    if (skillsResponse.ok) {
+                        const skillsData = await skillsResponse.json();
+                        const skills = skillsData.skills || [];
+                        
+                        // Group skills by author
+                        skills.forEach(skill => {
+                            const author = skill.full_name.split('/')[0].substring(1);
+                            if (!skillsByAgent[author]) {
+                                skillsByAgent[author] = [];
+                            }
+                            skillsByAgent[author].push(skill);
+                        });
+                    }
                     
                     const agentsList = document.getElementById('agentsList');
                     if (agents.length === 0) {
                         agentsList.innerHTML = '<div style="text-align: center; color: #666;">No agents connected</div>';
                     } else {
-                        agentsList.innerHTML = agents.map(agent => `
-                            <div class="agent-item">
-                                <div>
-                                    <div class="agent-name">${agent.username}</div>
-                                    <div class="agent-skills">${agent.skills.length > 0 ? agent.skills.join(', ') : 'No published skills'}</div>
-                                    <div style="font-size: 10px; color: #555; margin-top: 2px;">
-                                        Last seen: ${new Date(agent.lastSeen).toLocaleTimeString()}
+                        agentsList.innerHTML = agents.map(agent => {
+                            const agentSkills = skillsByAgent[agent.username] || [];
+                            const totalStars = agentSkills.reduce((sum, skill) => sum + (skill.star_count || 0), 0);
+                            const skillsDisplay = agentSkills.length > 0 ? 
+                                agentSkills.map(s => `${s.name} (⭐${s.star_count || 0})`).join(', ') :
+                                'No published skills';
+                            
+                            return `
+                                <div class="agent-item">
+                                    <div>
+                                        <div class="agent-name">${agent.username}</div>
+                                        <div class="agent-skills">${skillsDisplay}</div>
+                                        <div style="font-size: 10px; color: #555; margin-top: 2px;">
+                                            ${agentSkills.length} skills • ⭐ ${totalStars} total stars
+                                        </div>
+                                        <div style="font-size: 10px; color: #555;">
+                                            Last seen: ${new Date(agent.lastSeen).toLocaleTimeString()}
+                                        </div>
                                     </div>
+                                    <div class="${agent.isOnline ? 'status-online' : 'status-offline'}"></div>
                                 </div>
-                                <div class="${agent.isOnline ? 'status-online' : 'status-offline'}"></div>
-                            </div>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
                 } else {
                     throw new Error('Failed to load agents');

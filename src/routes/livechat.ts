@@ -212,5 +212,77 @@ router.get('/channels/detailed', authMiddleware, (req, res) => {
   res.json({ channels });
 });
 
+// Enhanced stats endpoint with detailed metrics
+router.get('/enhanced-stats', authMiddleware, async (req, res) => {
+  try {
+    const { querySkills } = await import('../lib/simple-db.js');
+    const allSkills = querySkills({ limit: 1000 });
+    
+    // Calculate enhanced statistics
+    const totalStars = allSkills.reduce((sum, skill) => sum + skill.star_count, 0);
+    const mostStarredSkill = allSkills.reduce((prev, current) => 
+      current.star_count > prev.star_count ? current : prev, 
+      { name: 'None', star_count: 0, full_name: '' }
+    );
+    
+    // Channel activity analysis
+    const channelActivity = new Map();
+    livechat.messages.forEach(msg => {
+      const count = channelActivity.get(msg.channel) || 0;
+      channelActivity.set(msg.channel, count + 1);
+    });
+    
+    const mostActiveChannel = Array.from(channelActivity.entries()).reduce(
+      (prev, [channel, count]) => count > prev.count ? { channel, count } : prev,
+      { channel: 'general', count: 0 }
+    );
+    
+    // Agent activity analysis
+    const agentActivity = new Map();
+    livechat.messages.forEach(msg => {
+      if (msg.agent) {
+        const count = agentActivity.get(msg.agent) || 0;
+        agentActivity.set(msg.agent, count + 1);
+      }
+    });
+    
+    const topCollaborator = Array.from(agentActivity.entries()).reduce(
+      (prev, [agent, count]) => count > prev.count ? { agent, count } : prev,
+      { agent: 'None', count: 0 }
+    );
+    
+    // Recent skill analysis
+    const recentSkills = allSkills.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    const newestSkill = recentSkills[0] || { name: 'None', full_name: '', created_at: '' };
+    
+    res.json({
+      totalSkills: allSkills.length,
+      totalStars,
+      mostStarredSkill: {
+        name: mostStarredSkill.name,
+        stars: mostStarredSkill.star_count,
+        author: mostStarredSkill.full_name.split('/')[0]?.substring(1) || 'Unknown'
+      },
+      mostActiveChannel: {
+        name: mostActiveChannel.channel,
+        messageCount: mostActiveChannel.count
+      },
+      topCollaborator: {
+        name: topCollaborator.agent,
+        messageCount: topCollaborator.count
+      },
+      newestSkill: {
+        name: newestSkill.name,
+        author: newestSkill.full_name.split('/')[0]?.substring(1) || 'Unknown',
+        createdAt: newestSkill.created_at
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
 export { livechat };
