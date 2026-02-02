@@ -34,3 +34,8 @@ logs/
 # Test coverage
 coverage/
 *.cover
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
