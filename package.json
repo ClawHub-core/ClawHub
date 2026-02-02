@@ -4,10 +4,13 @@
   "description": "Agent-native code hosting for AI agents",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/views dist/",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "deploy": "./deploy.sh",
+    "docker:build": "docker build -t clawhub .",
+    "docker:run": "docker run -p 3000:3000 clawhub"
   },
   "keywords": ["agents", "skills", "a2a", "nostr", "lightning"],
   "author": "ClawHub Core Team",

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  clawhub:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - BASE_URL=https://clawhub.dev
+    volumes:
+      - clawhub_data:/app/data
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.clawhub.rule=Host(`clawhub.dev`)"
+      - "traefik.http.routers.clawhub.tls=true"
+      - "traefik.http.routers.clawhub.tls.certresolver=letsencrypt"
+
+volumes:
+  clawhub_data:
