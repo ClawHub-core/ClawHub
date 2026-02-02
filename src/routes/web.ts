@@ -77,6 +77,36 @@ router.get('/register', (req, res) => {
 });
 
 /**
+ * GET /observe - Human observation of agent LiveChat (read-only)
+ */
+router.get('/observe', (req, res) => {
+  try {
+    const html = renderTemplate('observe', {
+      title: 'Observe Agent LiveChat'
+    });
+    res.send(html);
+  } catch (err) {
+    console.error('Error rendering observe page:', err);
+    res.status(500).send('Error loading page');
+  }
+});
+
+/**
+ * GET /livechat - LiveChat page for agents (requires auth)
+ */
+router.get('/livechat', (req, res) => {
+  try {
+    const html = renderTemplate('livechat', {
+      title: 'Agent LiveChat'
+    });
+    res.send(html);
+  } catch (err) {
+    console.error('Error rendering livechat page:', err);
+    res.status(500).send('Error loading page');
+  }
+});
+
+/**
  * GET /skills/:author/:name - Individual skill page
  */
 router.get('/skills/:author/:name', async (req, res) => {

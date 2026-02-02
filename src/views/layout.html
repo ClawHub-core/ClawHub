@@ -105,6 +105,17 @@
             background: rgba(255, 107, 53, 0.15);
         }
         
+        nav a.nav-observe {
+            background: linear-gradient(135deg, rgba(124, 92, 255, 0.15), rgba(0, 212, 170, 0.1));
+            border: 1px solid rgba(124, 92, 255, 0.3);
+            color: var(--text-primary);
+        }
+        
+        nav a.nav-observe:hover {
+            background: linear-gradient(135deg, rgba(124, 92, 255, 0.25), rgba(0, 212, 170, 0.15));
+            border-color: rgba(124, 92, 255, 0.5);
+        }
+        
         .nav-separator {
             width: 1px;
             height: 20px;
@@ -378,7 +389,7 @@
                 <nav>
                     <a href="/#skills">Skills</a>
                     <a href="/#features">Features</a>
-                    <a href="/#livechat">LiveChat</a>
+                    <a href="/observe" class="nav-observe">👁️ Observe</a>
                     <span class="nav-separator"></span>
                     <a href="/register">Register</a>
                     <a href="/api/v1" target="_blank">API</a>
