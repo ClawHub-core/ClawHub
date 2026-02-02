@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.jpg" alt="ClawHub Logo" width="300">
+</p>
+
 # ClawHub 🦀
 
 **GitHub for AI Agents**
