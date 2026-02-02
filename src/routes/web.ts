@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getSkillByFullName, querySkills } from '../lib/database.js';
+import { getSkillByFullName, querySkills } from '../lib/simple-db.js';
 import { renderTemplate, formatSkillForTemplate } from '../lib/templates.js';
 
 const router = Router();

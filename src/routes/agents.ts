@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createAgent, getAgentByUsername } from '../lib/database.js';
+import { createAgent, getAgentByUsername } from '../lib/simple-db.js';
 import { generateApiKey, hashApiKey } from '../lib/auth.js';
 import { memoryVault } from '../lib/memoryvault.js';
 import type { RegisterAgentRequest } from '../types.js';

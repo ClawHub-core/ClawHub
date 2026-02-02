@@ -11,14 +11,37 @@ const livechat = new ClawHubLiveChat();
 router.post('/join', authMiddleware, async (req, res) => {
   try {
     const agent = (req as any).agent;
+    
+    // Fetch agent's published skills from database
+    const { querySkills } = await import('../lib/simple-db.js');
+    const publishedSkills = querySkills({ author: agent.username, limit: 100 });
+    
+    // Extract capabilities from skills
+    const skillNames = publishedSkills.map(skill => skill.name);
+    const capabilities = publishedSkills.reduce((caps, skill) => {
+      try {
+        const skillCaps = JSON.parse(skill.capabilities || '[]');
+        return [...caps, ...skillCaps];
+      } catch {
+        return caps;
+      }
+    }, [] as string[]);
+    
+    // Remove duplicates
+    const uniqueCapabilities = [...new Set(capabilities)];
+    
     const agentInfo = {
       username: agent.username,
-      skills: [], // Could be populated from agent's published skills
-      capabilities: [] // Could be inferred from skills
+      skills: skillNames,
+      capabilities: uniqueCapabilities
     };
     
     const result = await livechat.joinChat(agent.id, agentInfo);
-    res.json(result);
+    res.json({
+      ...result,
+      agent_skills: skillNames,
+      agent_capabilities: uniqueCapabilities
+    });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
@@ -139,6 +162,54 @@ router.get('/collaborations', authMiddleware, (req, res) => {
   }));
   
   res.json({ requests });
+});
+
+// Get connected agents with their skills
+router.get('/agents', authMiddleware, (req, res) => {
+  const cutoffTime = new Date(Date.now() - 30 * 60 * 1000); // 30 minutes ago
+  
+  const agents = Array.from(livechat.agents.entries()).map(([id, agent]) => ({
+    id,
+    username: agent.username,
+    skills: agent.skills,
+    capabilities: agent.capabilities,
+    joinedAt: agent.joinedAt,
+    lastSeen: agent.lastSeen,
+    activeChannels: Array.from(agent.activeChannels),
+    isOnline: agent.lastSeen > cutoffTime
+  }));
+  
+  res.json({ agents });
+});
+
+// Get detailed channel information
+router.get('/channels/detailed', authMiddleware, (req, res) => {
+  const channels = Array.from(livechat.channels.entries()).map(([id, channel]) => {
+    const recentMessages = livechat.getMessages({ channel: id, limit: 5 });
+    const activeMemberIds = Array.from(channel.members);
+    const activeMembers = activeMemberIds.map(memberId => {
+      const agent = livechat.agents.get(memberId);
+      return agent ? {
+        username: agent.username,
+        lastSeen: agent.lastSeen,
+        skills: agent.skills
+      } : null;
+    }).filter(Boolean);
+    
+    return {
+      id,
+      name: channel.name,
+      description: channel.description,
+      topic: channel.topic,
+      memberCount: channel.members.size,
+      messageCount: channel.messageCount,
+      lastActivity: channel.lastActivity,
+      recentMessages,
+      activeMembers
+    };
+  });
+  
+  res.json({ channels });
 });
 
 export default router;

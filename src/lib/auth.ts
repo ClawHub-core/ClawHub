@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
-import { getAgentByApiKeyHash } from './database.js';
+import { getAgentByApiKeyHash } from './simple-db.js';
 
 /**
  * Generate a new API key
