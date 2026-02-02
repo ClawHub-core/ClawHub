@@ -90,7 +90,7 @@ router.post('/', authMiddleware, async (req, res) => {
         version: meta.version,
         description: meta.description,
         category: meta.metadata?.category,
-        capabilities: meta.capabilities || [],
+        capabilities: JSON.stringify(meta.capabilities || []),
         interface_type: meta.interface,
         api_base: meta.metadata?.api_base,
         homepage: meta.homepage,
@@ -99,7 +99,10 @@ router.post('/', authMiddleware, async (req, res) => {
         skill_md_content: fetchResult.raw,
       });
 
-      const updated = await getSkillById(existing.id)!;
+      const updated = await getSkillById(existing.id);
+      if (!updated) {
+        return res.status(500).json({ error: 'Failed to retrieve updated skill' });
+      }
       return res.json({
         message: 'Skill updated',
         skill: formatSkillResponse(updated, agent.username),
@@ -206,7 +209,11 @@ router.post('/:author/:name/star', authMiddleware, async (req, res) => {
     const zapSats = parseInt(req.body.zap_sats) || 0;
     await starSkill(skill.id, agent.id, zapSats);
 
-    const updated = await getSkillById(skill.id)!;
+    const updated = await getSkillById(skill.id);
+    if (!updated) {
+      return res.status(500).json({ error: 'Failed to retrieve updated skill' });
+    }
+    
     res.json({
       message: zapSats > 0 ? `Starred with ${zapSats} sats` : 'Starred',
       star_count: updated.star_count,
